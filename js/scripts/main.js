@@ -126,3 +126,59 @@ function openDetailsPokemon() {
 function closeDetailsPokemon() {
   document.documentElement.classList.remove('open-modal');
 }
+
+// List pokemons types
+
+const areaTypes =  document.getElementById('js-type-area');
+const areaTypesMobile = document.querySelector('.dropdown-select');
+
+axios({
+  method: 'GET',
+  url: 'https://pokeapi.co/api/v2/type'
+})
+.then(response => {
+  const { results } = response.data;
+  results.forEach((type, index) => {
+      if(index < 18) {
+        let itemType = document.createElement('li');
+        areaTypes.appendChild(itemType);
+
+        let buttonType = document.createElement('button');
+        buttonType.classList = `type-filter ${type.name}`;
+        itemType.appendChild(buttonType);
+
+        let iconType = document.createElement('div');
+        iconType.classList = "icon";
+        buttonType.appendChild(iconType);
+
+        let srcType = document.createElement('img');
+        srcType.setAttribute('src', `images/icon-types/${type.name}.svg`)
+        iconType.appendChild(srcType);
+
+        let nameType = document.createElement('span');
+        nameType.textContent = firstLetterCapitalized(type.name);
+        buttonType.appendChild(nameType);
+
+        // Select mobile
+        let itemTypeMobile = document.createElement('li');
+        areaTypesMobile.appendChild(itemTypeMobile);
+
+        let buttonTypeSelectMobile = document.createElement('button');
+        buttonTypeSelectMobile.classList = `type-filter ${type.name}`;
+        itemTypeMobile.appendChild(buttonTypeSelectMobile);
+
+        let iconTypeMobile = document.createElement('div');
+        iconTypeMobile.classList = "icon";
+        buttonTypeSelectMobile.appendChild(iconTypeMobile);
+
+        let srcTypeMobile = document.createElement('img');
+        srcTypeMobile.setAttribute('src', `images/icon-types/${type.name}.svg`)
+        iconTypeMobile.appendChild(srcTypeMobile);
+
+        let nameTypeMobile = document.createElement('span');
+        nameTypeMobile.textContent = firstLetterCapitalized(type.name);
+        buttonTypeSelectMobile.appendChild(nameTypeMobile);
+
+      }
+  })
+})
