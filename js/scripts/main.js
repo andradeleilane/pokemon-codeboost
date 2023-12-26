@@ -36,6 +36,7 @@ function firstLetterCapitalized(string) {
 function createCardPokemon(code, tipo, nome, imagePokemon) {
   let card = document.createElement('button');
   card.classList = `card-pokemon js-open-details-pokemon ${tipo}`;
+  card.setAttribute('code-pokemon', code);
   areaPokemons.appendChild(card);
 
   let image = document.createElement('div');
@@ -81,7 +82,6 @@ function listingPokemons(urlApi) {
     url: urlApi
   })
   .then((response) => {
-    const countPokemons = document.getElementById('js-count-pokemons');
     const { results, next, count } =  response.data;
 
     countPokemons.innerText = count;
@@ -120,6 +120,35 @@ listingPokemons('https://pokeapi.co/api/v2/pokemon?limit=9&offset=0');
 
 function openDetailsPokemon() {
   document.documentElement.classList.add('open-modal');
+
+  let codePokemon = this.getAttribute('code-pokemon');
+  let imagePokemon = this.querySelector('.thumb-img');
+  let iconTypePokemon = this.querySelector('.info .icon img');
+  let namePokemon = this.querySelector('.info h3').textContent;
+  let codeStringPokemon = this.querySelector('.info span').textContent;
+  
+  const modalDetails = document.getElementById('js-modal-details');
+  const imagePokemonModal = document.getElementById('js-image-pokemon-modal');
+  const iconTypePokemonModal = document.getElementById('js-image-type-modal');
+  const namePokemonModal = document.getElementById('js-name-pokemon-modal');
+  const codePokemonModal = document.getElementById('js-code-pokemon-modal');
+
+
+  imagePokemonModal.setAttribute('src', imagePokemon.getAttribute('src'))
+  modalDetails.setAttribute('type-pokemon-modal', this.classList[2]);
+  iconTypePokemonModal.setAttribute('src', iconTypePokemon.getAttribute('src'));
+
+  namePokemonModal.textContent = namePokemon;
+  codePokemonModal.textContent = codeStringPokemon;
+
+  /*
+  axios({
+    method: 'GET',
+    url: `https://pokeapi.co/api/v2/pokemon/${codePokemon}`
+  })
+  .then(response => {
+    console.log(response.data.name)
+  })*/
 }
 
 function closeDetailsPokemon() {
@@ -278,4 +307,63 @@ function filterByTypes() {
     btnLoadMore.style.display = "block";
   }
   
+}
+
+// search pokemons
+
+const btnSearch = document.getElementById('js-btn-search');
+const inputSearch = document.getElementById('js-input-search');
+
+btnSearch.addEventListener('click', searchPokemon);
+inputSearch.addEventListener('keyup', (event) => {
+  if(event.code == 'Enter') {
+    searchPokemon();
+  }
+})
+
+function searchPokemon() {
+  let valueInput = inputSearch.value.toLowerCase();
+  const typeFilter = document.querySelectorAll('.type-filter');
+
+  typeFilter.forEach(type => {
+    type.classList.remove('active');
+  })
+
+  axios({
+    method: 'GET',
+    url: `https://pokeapi.co/api/v2/pokemon/${valueInput}`
+  })
+  .then(response => {
+    areaPokemons.innerHTML = "";
+    btnLoadMore.style.display = 'none';
+    countPokemons.textContent = 1;
+
+    const { name, id, sprites, types } = response.data;
+          
+      const infoCard = {
+        nome: name,
+        code: id,
+        image: sprites.other.dream_world.front_default,
+        tipo: types[0].type.name
+      }
+          
+      if(infoCard.image) {
+        createCardPokemon(infoCard.code, infoCard.tipo, infoCard.nome, infoCard.image);
+      }
+          
+      const cardPokemon = document.querySelectorAll('.js-open-details-pokemon');
+  
+        cardPokemon.forEach(card => {
+          card.addEventListener('click', openDetailsPokemon);
+      })
+  })
+  .catch((error) => {
+    if(error.response) {
+      areaPokemons.innerHTML = "";
+      btnLoadMore.style.display = 'none';
+      countPokemons.textContent = 0;
+      alert('Nenhum resultado encontrado com essa pesquisa.');
+    }
+  })
+
 }
